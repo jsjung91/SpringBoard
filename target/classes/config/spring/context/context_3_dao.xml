@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+	
+	<!-- Dao 등록 -->
+	
+	
+	<!-- Autowired를 처리해주게끔 설정  -->
+	<context:annotation-config/>
+	
+	<!-- autowire : 해당객체속성중 @Autowired가 붙은 변수를
+	                Spring이 생성된 객체중에서 검색해서 연결시켜라
+	                [ autowire속성값 ]
+	                default : byType -> byName
+	                byType  : 자료형이 일치하는 객체로 연결
+	                byName  : 이름이 일치하는 객체로 연결
+	 -->
+	<bean id="test_dao" class="dao.TestDao" autowire="default">
+	</bean>
+	
+	
+</beans>

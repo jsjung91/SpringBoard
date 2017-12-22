@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="">
+
+	<!-- 전체조회 -->
+	<select id="board_list" resultType="vo.BoardVo">
+		select * from board order by
+		ref desc,step asc
+	</select>
+
+	<!-- 페이징/검색조건에 따른 조회 
+	     Map map = new HashMap();
+	     map.put("start",1);
+	     map.put("end",10); 
+	
+	-->
+	<select id="board_condition_list" 
+	        parameterType="java.util.Map" resultType="board">
+		select * from
+		(
+			select
+			rank() over(order by ref desc,step asc) no,
+			b.*
+			from
+				(
+				  <!-- Dynamic Query -->
+				  select * from board
+				  <trim prefix="where" prefixOverrides="or">
+				     <if test="name!=null">
+				       name like '%' || #{ name } || '%'
+				     </if>
+				     <if test="subject!=null">
+				       or subject like '%' || #{ subject } || '%'
+				     </if>
+				     <if test="content!=null">
+				       or content like '%' || #{ content } || '%'
+				     </if>
+				  </trim>
+				  
+				) b
+		)
+		where no between #{ start } and #{ end }
+	</select>
+	
+	<!-- 전체레코드수 구하기 -->
+	<select id="board_row_total" parameterType="java.util.Map" resultType="int">
+	   select count(*) from board
+	   <trim prefix="where" prefixOverrides="or">
+	     <if test="name!=null">
+	       name like '%' || #{ name } || '%'
+	     </if>
+	     <if test="subject!=null">
+	       or subject like '%' || #{ subject } || '%'
+	     </if>
+	     <if test="content!=null">
+	       or content like '%' || #{ content } || '%'
+	     </if>
+	  </trim>
+	   
+	</select>
+	
+
+	<!-- 게시물 1건 조회 -->
+	<select id="board_one" parameterType="int" resultType="board">
+		select * from board where idx = #{ idx }
+	</select>
+
+	<!-- 조회수 증가 -->
+	<update id="board_readhit" parameterType="int">
+		update board set readhit = readhit + 1
+		where idx = #{ idx }
+	</update>
+
+	<!-- 새글쓰기 -->
+	<insert id="board_insert" parameterType="board">
+		insert into board values(
+		seq_board_idx.nextVal,
+		#{ name },
+		#{ subject },
+		#{ content },
+		#{ pwd },
+		#{ ip },
+		sysdate,
+		0,
+		seq_board_idx.currVal,
+		0,
+		0
+		)
+	</insert>
+
+	<!-- 답글쓰기 -->
+	<insert id="board_reply" parameterType="board">
+		insert into board values(
+		seq_board_idx.nextVal,
+		#{ name },
+		#{ subject },
+		#{ content },
+		#{ pwd },
+		#{ ip },
+		sysdate,
+		0,
+		#{ ref },
+		#{ step },
+		#{ depth }
+		)
+	</insert>
+
+	<!-- 기준글의 하윗글의 step를 1씩 증가 -->
+	<update id="board_update_step" parameterType="board">
+		update board set step = step + 1
+		where ref = #{ ref } and step > #{ step }
+	</update>
+
+	<!-- 게시물 수정 -->
+	<update id="board_update" parameterType="board">
+		update board set
+		name=#{name},
+		subject=#{subject},
+		content=#{content},
+		pwd=#{pwd},
+		ip=#{ip},
+		regdate=sysdate
+		where idx = #{ idx }
+	</update>
+
+	<!-- 게시물 삭제 -->
+	<delete id="board_delete" parameterType="int">
+		delete from board where
+		idx = #{ idx }
+	</delete>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
